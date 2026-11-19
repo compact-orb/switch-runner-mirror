@@ -1,0 +1,26 @@
+name: 'Switch runner mirror'
+description: >-
+  Switches package manager mirrors to a reliable, high-throughput mirror on
+  Linux runners.
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Switch Ubuntu mirror'
+      shell: bash
+      run: |
+        mirror="http://mirrors.edge.kernel.org/ubuntu/"
+        if [[ -f "/etc/apt/apt-mirrors.txt" ]]; then
+          printf "%s\n" "${mirror}" | \
+            sudo tee /etc/apt/apt-mirrors.txt > /dev/null
+        fi
+        if [[ -f "/etc/apt/sources.list.d/ubuntu.sources" ]]; then
+          sudo sed --in-place --regexp-extended \
+            "s|https?://[^ ]*ubuntu\.com/ubuntu/?|${mirror}|g" \
+            /etc/apt/sources.list.d/ubuntu.sources
+        fi
+        if [[ -f "/etc/apt/sources.list" ]]; then
+          sudo sed --in-place --regexp-extended \
+            "s|https?://[^ ]*ubuntu\.com/ubuntu/?|${mirror}|g" \
+            /etc/apt/sources.list
+        fi
